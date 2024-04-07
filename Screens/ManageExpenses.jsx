@@ -5,6 +5,11 @@ import IconButton from "../Components/IconButton";
 import Button from "../Components/Button";
 import { useExpenseContext } from "../Contexts/ExpenseContext";
 import ExpenseForm from "../Components/ManageExpense/ExpenseForm";
+import {
+  deleteExpenseFireBase,
+  storeExpense,
+  updateExpenseFireBase,
+} from "../Utils/http";
 
 function ManageExpenses({ route, navigation }) {
   const { expences, addExpence, deleteExpence, updateExpence } =
@@ -17,20 +22,23 @@ function ManageExpenses({ route, navigation }) {
     navigation.setOptions({ title: id ? "Edit Expense" : "Add Expense" });
   }, [id, navigation]);
 
-  function handleDelete() {
+  async function handleDelete() {
+    await deleteExpenseFireBase(id);
     deleteExpence(id);
     navigation.goBack();
   }
 
-  function handleConfirm(data) {
+  async function handleConfirm(data) {
     if (id) {
       updateExpence({
         id: id,
         ...data,
       });
+      await updateExpenseFireBase(id, data);
     } else {
+      const id = await storeExpense(data);
       addExpence({
-        id: Math.random().toString(),
+        id: id,
         ...data,
       });
     }
